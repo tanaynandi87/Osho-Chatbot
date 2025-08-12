@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OshoBot Analytics Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card h3 {
+            color: #666;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .stat-card .value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .stat-card .change {
+            font-size: 0.9rem;
+            color: #28a745;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .chart-container {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .chart-container h3 {
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .table-container {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .table-container h3 {
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+        }
+
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .refresh-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-bottom: 20px;
+            transition: background 0.3s ease;
+        }
+
+        .refresh-btn:hover {
+            background: #0056b3;
+        }
+
+        @media (max-width: 768px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧘‍♂️ OshoBot Analytics Dashboard</h1>
+            <p>Real-time insights into your spiritual AI chatbot performance</p>
+        </div>
+
+        <button class="refresh-btn" onclick="refreshData()">🔄 Refresh Data</button>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Total Users</h3>
+                <div class="value" id="totalUsers">1,247</div>
+                <div class="change">+12% this week</div>
+            </div>
+            <div class="stat-card">
+                <h3>Active Today</h3>
+                <div class="value" id="activeToday">89</div>
+                <div class="change">+5% vs yesterday</div>
+            </div>
+            <div class="stat-card">
+                <h3>Messages Today</h3>
+                <div class="value" id="messagesToday">342</div>
+                <div class="change">+18% vs yesterday</div>
+            </div>
+            <div class="stat-card">
+                <h3>Premium Users</h3>
+                <div class="value" id="premiumUsers">156</div>
+                <div class="change">+8% this month</div>
+            </div>
+            <div class="stat-card">
+                <h3>Avg Response Time</h3>
+                <div class="value" id="avgResponseTime">2.3s</div>
+                <div class="change">-15% vs last week</div>
+            </div>
+            <div class="stat-card">
+                <h3>Success Rate</h3>
+                <div class="value" id="successRate">99.2%</div>
+                <div class="change">+0.3% vs last week</div>
+            </div>
+        </div>
+
+        <div class="charts-grid">
+            <div class="chart-container">
+                <h3>Daily Message Volume</h3>
+                <canvas id="messageChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3>User Growth</h3>
+                <canvas id="userChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3>Message Categories</h3>
+                <canvas id="categoryChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3>Response Time Trends</h3>
+                <canvas id="responseTimeChart"></canvas>
+            </div>
+        </div>
+
+        <div class="table-container full-width">
+            <h3>Recent User Interactions</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>User</th>
+                        <th>Question</th>
+                        <th>Category</th>
+                        <th>Response Time</th>
+                        <th>User Type</th>
+                    </tr>
+                </thead>
+                <tbody id="interactionsTable">
+                    <tr>
+                        <td>10:30 AM</td>
+                        <td>John Doe</td>
+                        <td>What is the meaning of life?</td>
+                        <td>life_meaning</td>
+                        <td>2.1s</td>
+                        <td>Premium</td>
+                    </tr>
+                    <tr>
+                        <td>10:25 AM</td>
+                        <td>Jane Smith</td>
+                        <td>How to meditate properly?</td>
+                        <td>meditation</td>
+                        <td>1.8s</td>
+                        <td>Free</td>
+                    </tr>
+                    <tr>
+                        <td>10:20 AM</td>
+                        <td>Mike Johnson</td>
+                        <td>Dealing with relationship issues</td>
+                        <td>love</td>
+                        <td>2.5s</td>
+                        <td>Premium</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Initialize charts
+        function initCharts() {
+            // Daily Message Volume Chart
+            const messageCtx = document.getElementById('messageChart').getContext('2d');
+            new Chart(messageCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [{
+                        label: 'Messages',
+                        data: [156, 189, 203, 178, 245, 267, 234],
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // User Growth Chart
+            const userCtx = document.getElementById('userChart').getContext('2d');
+            new Chart(userCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                    datasets: [{
+                        label: 'New Users',
+                        data: [45, 67, 89, 123],
+                        backgroundColor: '#764ba2'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // Message Categories Chart
+            const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+            new Chart(categoryCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Love', 'Meditation', 'Life Meaning', 'Pain/Suffering', 'Ego/Identity', 'Death/Mortality', 'General'],
+                    datasets: [{
+                        data: [25, 20, 18, 15, 12, 8, 2],
+                        backgroundColor: [
+                            '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0',
+                            '#9966FF', '#FF9F40', '#FF6384'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+
+            // Response Time Chart
+            const responseCtx = document.getElementById('responseTimeChart').getContext('2d');
+            new Chart(responseCtx, {
+                type: 'line',
+                data: {
+                    labels: ['9 AM', '10 AM', '11 AM', '12 PM', '1 PM', '2 PM', '3 PM'],
+                    datasets: [{
+                        label: 'Response Time (seconds)',
+                        data: [2.1, 1.8, 2.3, 2.7, 2.0, 1.9, 2.2],
+                        borderColor: '#28a745',
+                        backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 5
+                        }
+                    }
+                }
+            });
+        }
+
+        // Refresh data function
+        function refreshData() {
+            // Simulate data refresh
+            const btn = document.querySelector('.refresh-btn');
+            btn.textContent = '🔄 Refreshing...';
+            btn.disabled = true;
+
+            setTimeout(() => {
+                // Update random values to simulate real-time data
+                document.getElementById('activeToday').textContent = Math.floor(Math.random() * 50) + 70;
+                document.getElementById('messagesToday').textContent = Math.floor(Math.random() * 100) + 300;
+                document.getElementById('avgResponseTime').textContent = (Math.random() * 1 + 1.5).toFixed(1) + 's';
+                
+                btn.textContent = '🔄 Refresh Data';
+                btn.disabled = false;
+            }, 1000);
+        }
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            initCharts();
+            
+            // Auto-refresh every 5 minutes
+            setInterval(refreshData, 300000);
+        });
+    </script>
+</body>
+</html>

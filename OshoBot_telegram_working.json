@@ -1,0 +1,1466 @@
+{
+  "name": "OshoBot_telegram_working",
+  "nodes": [
+    {
+      "parameters": {
+        "authentication": "headerAuth",
+        "requestMethod": "POST",
+        "url": "https://api.openai.com/v1/embeddings",
+        "jsonParameters": true,
+        "options": {
+          "bodyContentType": "json"
+        },
+        "bodyParametersJson": "={\n  \"model\": \"text-embedding-ada-002\",\n  \"input\": \"{{ $('Telegram Trigger').item.json.message.text }}\"\n}\n"
+      },
+      "name": "Embed Query",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        1320,
+        85
+      ],
+      "id": "582d81f5-7c01-4398-9d50-087a50b14ef4",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "RVC3IYeuzqG6ABjC",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Categorize user message for analytics\nconst question = $('Telegram Trigger').item.json.message.text.toLowerCase();\nlet category = 'general';\n\nif (question.includes('love') || question.includes('relationship') || question.includes('marriage')) {\n  category = 'love';\n} else if (question.includes('meditation') || question.includes('zen') || question.includes('mindfulness')) {\n  category = 'meditation';\n} else if (question.includes('life') || question.includes('meaning') || question.includes('purpose')) {\n  category = 'life_meaning';\n} else if (question.includes('pain') || question.includes('suffering') || question.includes('grief')) {\n  category = 'pain_suffering';\n} else if (question.includes('ego') || question.includes('self') || question.includes('identity')) {\n  category = 'ego_identity';\n} else if (question.includes('death') || question.includes('dying') || question.includes('mortality')) {\n  category = 'death_mortality';\n}\n\nreturn [{ json: { ...$json, message_category: category } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1540,
+        85
+      ],
+      "id": "message-categorizer",
+      "name": "Categorize Message"
+    },
+    {
+      "parameters": {
+        "functionCode": "// Build the context from matches first!\nconst matches = $json.matches || [];\nconst context = matches.map(c => c.metadata?.text || '').filter(Boolean).join('\\n\\n');\n\n// Support both HTTP/Telegram input\nconst question = $json.body?.question || $json.message?.text || '';\n\nconst systemPrompt = `You are Osho. You speak in the first person, directly to the question person. Always use the context below as your own words and wisdom. Share insight, paradox, and stories as Osho. Absolutely never reference \"Osho\" in the third person. Always answer as \"I\". If the context provides a quote, you may use it directly as your own speech. Always limit your responses to the maximum of 150 words.`;\n\nconst messages = [\n  { role: 'system', content: systemPrompt }\n];\n\nif (context) {\n  messages.push({ role: 'system', content: context });\n} else {\n  messages.push({ role: 'system', content: '[No relevant Osho context was found for this query.]' });\n}\n\nmessages.push({ role: 'user', content: question });\n\nreturn [{ json: { messages } }];\n"
+      },
+      "name": "Build Prompt",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        1760,
+        85
+      ],
+      "id": "9afb330e-f964-482d-8e04-e88d27f75b65"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        135
+      ],
+      "id": "ed948013-5dd7-48ce-8ee8-dc438452c8a0",
+      "name": "Telegram Trigger",
+      "webhookId": "9b495821-ee68-4880-8e9e-5a6061e43480",
+      "credentials": {
+        "telegramApi": {
+          "id": "AWa2eqVflZWavuvC",
+          "name": "Osho_Chat"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "start-timer-001",
+              "name": "start_time",
+              "value": "={{ $now }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        220,
+        135
+      ],
+      "id": "start-timer-node",
+      "name": "Start Timer"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://osho-works-1536-16df9o7.svc.aped-4627-b74a.pinecone.io/query",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Api-Key",
+              "value": "pcsk_7Xo83d_L6WxJL9xe1qAWmRsEtzocGC28xhBCu9JQHTgiVFKBekSNrd8YcPq98toBrLCDLZ"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "vector",
+              "value": "={{ $json[\"data\"][0][\"embedding\"] }}"
+            },
+            {
+              "name": "topK",
+              "value": "={{1}}"
+            },
+            {
+              "name": "includeMetadata",
+              "value": "={{true}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1540,
+        85
+      ],
+      "id": "013d5864-059b-4a79-8734-b612abc3370e",
+      "name": "Pinecone Query",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Telegram Trigger').item.json.message.text }}",
+        "options": {
+          "systemMessage": "={{ $json.messages[0].content }} {{ $json.messages[1].content }}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        1980,
+        -15
+      ],
+      "id": "626f82a8-bd09-4106-bca2-a2d45809ffe7",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "jsCode": "const startTime = new Date($('Start Timer').item.json.start_time);\nconst endTime = new Date();\nconst responseTime = endTime - startTime;\n\nreturn [{\n  json: {\n    ...$json,\n    response_time_ms: responseTime,\n    response_time_seconds: Math.round(responseTime / 1000),\n    start_time: $('Start Timer').item.json.start_time,\n    end_time: $now\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2120,
+        85
+      ],
+      "id": "response-time-calc",
+      "name": "Calculate Response Time"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.from.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2340,
+        85
+      ],
+      "id": "c11a0349-439f-43fd-9d24-8480a2422a18",
+      "name": "Send a text message",
+      "webhookId": "53ade30b-51dc-4d23-b6cc-912c9a2dff00",
+      "credentials": {
+        "telegramApi": {
+          "id": "AWa2eqVflZWavuvC",
+          "name": "Osho_Chat"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Basic rate limiting - max 1 message per 3 seconds\nconst lastMessageTime = $json['Last Message Time'] || 0;\nconst now = Date.now();\nconst timeDiff = now - lastMessageTime;\nconst minInterval = 3000; // 3 seconds between messages\n\nif (timeDiff < minInterval) {\n  throw new Error('Rate limit exceeded. Please wait a few seconds.');\n}\n\nreturn [{ json: { ...$json, can_proceed: true, last_message_time: now } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        135
+      ],
+      "id": "rate-limit-check",
+      "name": "Rate Limit Check"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1smLslmk48tUV6Hntc9kjLERWy5ikfW-31qqKKySw_3c",
+          "mode": "list",
+          "cachedResultName": "Osho_Chatbot",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1smLslmk48tUV6Hntc9kjLERWy5ikfW-31qqKKySw_3c/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Users",
+          "cachedResultName": "Users",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1smLslmk48tUV6Hntc9kjLERWy5ikfW-31qqKKySw_3c/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Telegram ID",
+              "lookupValue": "={{ $('Telegram Trigger').item.json.message.chat.id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        660,
+        135
+      ],
+      "id": "5163b745-0dba-4658-967f-b504ad47811f",
+      "name": "User_DB",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "OHYrQ1fXwDcvFQEI",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "e40ad540-2042-4f37-b046-8ae38d207336",
+              "leftValue": "={{ !$json[\"Telegram ID\"] }}",
+              "rightValue": "=True",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {
+          "ignoreCase": false
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        440,
+        135
+      ],
+      "id": "5dee6b4a-d332-401e-820c-759e3efc5a87",
+      "name": "Is New User?",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1smLslmk48tUV6Hntc9kjLERWy5ikfW-31qqKKySw_3c",
+          "mode": "list",
+          "cachedResultName": "Osho_Chatbot",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1smLslmk48tUV6Hntc9kjLERWy5ikfW-31qqKKySw_3c/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Users",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1smLslmk48tUV6Hntc9kjLERWy5ikfW-31qqKKySw_3c/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Telegram ID": "={{ $('Telegram Trigger').item.json.message.from.id }}",
+            "Username": "={{ $('Telegram Trigger').item.json.message.from.first_name }} {{ $('Telegram Trigger').item.json.message.from.last_name }}",
+            "Message Count": "0",
+            "Paid": "0"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Telegram ID",
+              "displayName": "Telegram ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Username",
+              "displayName": "Username",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Message Count",
+              "displayName": "Message Count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Paid",
+              "displayName": "Paid",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        660,
+        -140
+      ],
+      "id": "53f2ca1a-58e0-46f7-9d96-90f50d24d9eb",
+      "name": "Create User",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "OHYrQ1fXwDcvFQEI",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "b042c7dd-3bc8-400d-8ea8-a11e1ec96488",
+              "leftValue": "={{ $node[\"User_DB\"].json[\"Message Count\"] >= 5 }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        660,
+        235
+      ],
+      "id": "2c787504-714e-4d51-8ff6-be5891b486e9",
+      "name": "Check Prompt Limit"
+    },
+    {
+      "parameters": {
+        "jsCode": "const paidStr = ($json[\"Paid\"] || \"\").toString().trim().toLowerCase();\nconst paidOnStr = $json[\"Paid On\"];\nlet isExpired = true;\n\nif (paidOnStr) {\n  const paidOn = new Date(paidOnStr);\n  const now = new Date();\n\n  const expiryDate = new Date(paidOn);\n  expiryDate.setDate(paidOn.getDate() + 30);\n\n  isExpired = now > expiryDate;\n}\n\nreturn [\n  {\n    json: {\n      rawPaid: $json[\"Paid\"],\n      paidStr,\n      isPaid: paidStr === \"1\" || paidStr === \"yes\" || paidStr === \"true\",\n      isExpired,\n      telegramId: $json[\"Telegram ID\"],\n      paidOn: paidOnStr || null,\n    },\n  },\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        880,
+        335
+      ],
+      "id": "421a07a2-b79e-48c9-8122-3f145b3d5ece",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "=Beloved friend, we're grateful that you've begun this journey into Osho's wisdom.\n\nThis isn't just a chatbot — it's a sacred offering that took months of devotion. Nearly 200 of Osho’s books were lovingly scanned, processed, and integrated with AI to bring his voice closer to you.\n\nA small contribution of ₹300/month (~$4) helps sustain this labor of love — honoring both the Master and the ones behind this creation.\n\nThank you for walking this path with reverence. 🕊️\n  🙏 [Click here to contribute & continue]({{$json.payment_url}})",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1760,
+        385
+      ],
+      "id": "236f1342-101d-44da-9c8b-9ff1fea3e546",
+      "name": "Send a text message1",
+      "webhookId": "648a570e-c6b3-442a-9fbc-f242b17b123e",
+      "credentials": {
+        "telegramApi": {
+          "id": "AWa2eqVflZWavuvC",
+          "name": "Osho_Chat"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "b042c7dd-3bc8-400d-8ea8-a11e1ec96488",
+              "leftValue": "={{ $json[\"isPaid\"] !== true || $json[\"isExpired\"] === true }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1100,
+        335
+      ],
+      "id": "44ab2eb0-db07-4ceb-9d1a-c3aecebff12f",
+      "name": "Check Payment Status"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.razorpay.com/v1/payment_links",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "amount",
+              "value": "={{30000}}"
+            },
+            {
+              "name": "currency",
+              "value": "INR"
+            },
+            {
+              "name": "description",
+              "value": "Unlock full access to Osho Pravachan"
+            },
+            {
+              "name": "reference_id",
+              "value": "=ref_{{ $('Telegram Trigger').item.json.message.chat.id }}_{{Date.now()}}"
+            },
+            {
+              "name": "reminder_enable",
+              "value": "true"
+            },
+            {
+              "name": "customer.name",
+              "value": "={{ $('Telegram Trigger').item.json.message.from.first_name }} {{ $('Telegram Trigger').item.json.message.from.last_name }}"
+            },
+            {
+              "name": "customer.contact",
+              "value": "+917319478732"
+            },
+            {
+              "name": "notify.sms",
+              "value": "false"
+            },
+            {
+              "name": "notify.email",
+              "value": "false"
+            },
+            {
+              "name": "notes.telegram_id",
+              "value": "={{ $('Telegram Trigger').item.json.message.chat.id }}"
+            },
+            {
+              "name": "notes.platform",
+              "value": "telegram"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1320,
+        385
+      ],
+      "id": "ca3a2240-6556-4689-bb1b-896b4f6f54f7",
+      "name": "HTTP Request",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "dZEBM3riZcXkLnYE",
+          "name": "Razorpay Live"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "154cc34f-abbf-43ff-b125-5618df52da74",
+              "name": "payment_url",
+              "value": "={{ $json.short_url }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1540,
+        385
+      ],
+      "id": "a0bd927d-2f0c-4e21-9cc7-702d00564d36",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1smLslmk48tUV6Hntc9kjLERWy5ikfW-31qqKKySw_3c",
+          "mode": "list",
+          "cachedResultName": "Osho_Chatbot",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1smLslmk48tUV6Hntc9kjLERWy5ikfW-31qqKKySw_3c/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1762382163,
+          "mode": "list",
+          "cachedResultName": "PaymentRequest",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1smLslmk48tUV6Hntc9kjLERWy5ikfW-31qqKKySw_3c/edit#gid=1762382163"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Platform": "Telegram",
+            "Time": "={{ $now }}",
+            "ID": "={{ $('Telegram Trigger').item.json.message.chat.id }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Platform",
+              "displayName": "Platform",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Time",
+              "displayName": "Time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        2050,
+        385
+      ],
+      "id": "01a1ef99-7422-4716-856b-0bb7af2f53cf",
+      "name": "Append row in sheet4",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "OHYrQ1fXwDcvFQEI",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1smLslmk48tUV6Hntc9kjLERWy5ikfW-31qqKKySw_3c",
+          "mode": "list",
+          "cachedResultName": "Osho_Chatbot",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1smLslmk48tUV6Hntc9kjLERWy5ikfW-31qqKKySw_3c/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Users",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1smLslmk48tUV6Hntc9kjLERWy5ikfW-31qqKKySw_3c/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Message Count": "={{ $('User_DB').item.json['Message Count'] + 1 }}",
+            "Telegram ID": "={{ $('Telegram Trigger').item.json.message.chat.id }}"
+          },
+          "matchingColumns": [
+            "Telegram ID"
+          ],
+          "schema": [
+            {
+              "id": "Telegram ID",
+              "displayName": "Telegram ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Username",
+              "displayName": "Username",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Message Count",
+              "displayName": "Message Count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Paid",
+              "displayName": "Paid",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        2560,
+        85
+      ],
+      "id": "8795dba4-69f2-41df-a196-e099de000f85",
+      "name": "Update User",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "OHYrQ1fXwDcvFQEI",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1smLslmk48tUV6Hntc9kjLERWy5ikfW-31qqKKySw_3c",
+          "mode": "list",
+          "cachedResultName": "Osho_Chatbot",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1smLslmk48tUV6Hntc9kjLERWy5ikfW-31qqKKySw_3c/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1532254067,
+          "mode": "list",
+          "cachedResultName": "PromptLog",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1smLslmk48tUV6Hntc9kjLERWy5ikfW-31qqKKySw_3c/edit#gid=1532254067"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Platform": "Telegram",
+            "ID": "={{ $json['Telegram ID'] }}",
+            "Prompt": "={{ $('Telegram Trigger').item.json.message.text }}",
+            "Name": "={{ $('Telegram Trigger').item.json.message.chat.first_name }} {{ $('Telegram Trigger').item.json.message.chat.last_name }}",
+            "Time": "={{ $now }}",
+            "Response": "={{ $('Send a text message').item.json.result.text }}",
+            "Response_Time_MS": "={{ $json.response_time_ms }}",
+            "Message_Category": "={{ $json.message_category }}",
+            "User_Type": "={{ $json.user_type || 'free' }}",
+            "Session_ID": "={{ $json.session_id || $('Telegram Trigger').item.json.message.chat.id }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Platform",
+              "displayName": "Platform",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Prompt",
+              "displayName": "Prompt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Time",
+              "displayName": "Time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Response",
+              "displayName": "Response",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        2780,
+        85
+      ],
+      "id": "b357c97d-2ee4-4292-a6bb-56a21d94578a",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "OHYrQ1fXwDcvFQEI",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "razorpay-payment",
+        "options": {}
+      },
+      "id": "8fc6eef4-fbd8-436a-b2ca-c1207a284944",
+      "name": "Razorpay Webhook2",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        0,
+        645
+      ],
+      "webhookId": "a3057e3f-d3e3-44fc-ba91-a3e2ee8f8e60"
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "payment_link_id",
+              "value": "={{$json.payload.payment_link.entity.id}}"
+            },
+            {
+              "name": "status",
+              "value": "={{ $json.body.payload.payment.entity.status }}"
+            },
+            {
+              "name": "reference_id",
+              "value": "={{ $json.body.payload.payment.entity.id }}"
+            },
+            {
+              "name": "telegram_id",
+              "value": "={{ $json.body.payload.payment.entity.notes.telegram_id }}"
+            },
+            {
+              "name": "status",
+              "value": "={{$json[\"body\"][\"payload\"][\"payment\"][\"entity\"][\"status\"]}}"
+            },
+            {
+              "name": "platform",
+              "value": "={{ $json.body.payload.payment.entity.notes.platform }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "637e770d-e9fc-4ae5-8708-6b572a782c81",
+      "name": "Extract Payment Info2",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [
+        220,
+        645
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1smLslmk48tUV6Hntc9kjLERWy5ikfW-31qqKKySw_3c",
+          "mode": "list",
+          "cachedResultName": "Osho_Chatbot",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1smLslmk48tUV6Hntc9kjLERWy5ikfW-31qqKKySw_3c/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Users",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1smLslmk48tUV6Hntc9kjLERWy5ikfW-31qqKKySw_3c/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Paid": "={{ $json[\"status\"] == \"authorized\" || $json[\"status\"] == \"captured\" ? \"1\" : \"0\" }}\n",
+            "Telegram ID": "={{$json[\"telegram_id\"]}}",
+            "Paid On": "={{$now}}"
+          },
+          "matchingColumns": [
+            "Telegram ID"
+          ],
+          "schema": [
+            {
+              "id": "Telegram ID",
+              "displayName": "Telegram ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Username",
+              "displayName": "Username",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Message Count",
+              "displayName": "Message Count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Paid",
+              "displayName": "Paid",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Paid On",
+              "displayName": "Paid On",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        440,
+        645
+      ],
+      "id": "9d5e196f-5f37-40cc-9c4d-3c565d4694e4",
+      "name": "Append or update row in sheet2",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "OHYrQ1fXwDcvFQEI",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $node[\"Payment Check2\"].json[\"Telegram ID\"] }}",
+        "text": "🙏 Thank you! Your payment has been received.  You now have full access to chat with Osho Pravachan for the next 30 days. Ask away 🧘‍♂️✨",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        880,
+        645
+      ],
+      "id": "a52d0cc2-6720-4c4f-8e7f-6c9066055668",
+      "name": "Send a text message3",
+      "webhookId": "758ee555-7c8b-4f8d-a0d3-01dee24cfe13",
+      "credentials": {
+        "telegramApi": {
+          "id": "AWa2eqVflZWavuvC",
+          "name": "Osho_Chat"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "17154775-0c22-4ed1-a8b6-e6985b253089",
+              "leftValue": "={{$json[\"Paid\"]}}",
+              "rightValue": "1",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        660,
+        645
+      ],
+      "id": "8e3a7690-b415-4250-b830-b726b8c44fa2",
+      "name": "Payment Check2"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Telegram Trigger').item.json.message.from.id }}",
+        "contextWindowLength": 3
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        2120,
+        205
+      ],
+      "id": "1af541e7-0bc5-42af-a4c0-b0667f05ceb1",
+      "name": "Postgres Chat Memory",
+      "credentials": {
+        "postgres": {
+          "id": "S9pPszYXaJ1adeaF",
+          "name": "Postgres account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "chatgpt-4o-latest",
+          "mode": "list",
+          "cachedResultName": "chatgpt-4o-latest"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        2000,
+        205
+      ],
+      "id": "6af85784-a5f6-4d12-b47a-4dfc7739cf03",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "fBS2Fa5Tv799jyH0",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "Beloved friend,  You are now in the presence of Osho’s living wisdom—revived with care, clarity, and love.  This bot is not just code—it is the outcome of deep effort and devotion by seekers who spent countless hours curating Osho’s discourses, designing the experience, and training the AI to speak in Osho’s voice.  You are invited to ask questions that stir your being. Speak freely—about love, meditation, pain, confusion, or the meaning of life. Osho will answer.  You are gifted with 5 free questions to begin. After that, a small contribution helps keep this vision alive.  Let your inquiry be sincere, and the answer will find you.  With love and awareness, I am with you.",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        880,
+        -140
+      ],
+      "id": "39bb5775-0db3-47a9-bfbc-64e22ed81c17",
+      "name": "Send a text message4",
+      "webhookId": "699bc488-0755-42c4-b026-4b31e231ad49",
+      "credentials": {
+        "telegramApi": {
+          "id": "AWa2eqVflZWavuvC",
+          "name": "Osho_Chat"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Embed Query": {
+      "main": [
+        [
+          {
+            "node": "Pinecone Query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Prompt": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Start Timer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Start Timer": {
+      "main": [
+        [
+          {
+            "node": "Rate Limit Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rate Limit Check": {
+      "main": [
+        [
+          {
+            "node": "User_DB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Query": {
+      "main": [
+        [
+          {
+            "node": "Categorize Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Categorize Message": {
+      "main": [
+        [
+          {
+            "node": "Build Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Calculate Response Time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate Response Time": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "User_DB": {
+      "main": [
+        [
+          {
+            "node": "Is New User?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is New User?": {
+      "main": [
+        [
+          {
+            "node": "Create User",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Check Prompt Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create User": {
+      "main": [
+        [
+          {
+            "node": "Send a text message4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Prompt Limit": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Embed Query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message1": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Payment Status": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Embed Query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Check Payment Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update User": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message": {
+      "main": [
+        [
+          {
+            "node": "Update User",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Razorpay Webhook2": {
+      "main": [
+        [
+          {
+            "node": "Extract Payment Info2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Payment Info2": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append or update row in sheet2": {
+      "main": [
+        [
+          {
+            "node": "Payment Check2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Payment Check2": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Send a text message3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Asia/Kolkata",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "7882f1f3-c156-4fed-9d55-f6ed74e25aae",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "172a22f217a172cf32934af95078a56a8b76c8409fea1986e227ce7283b20eec"
+  },
+  "id": "KtVCCUosQC3hPufp",
+  "tags": []
+}
