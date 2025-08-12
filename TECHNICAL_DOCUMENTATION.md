@@ -438,5 +438,6 @@ TELEGRAM_RATE_LIMIT=30
 ---
 
 **Document Version**: 1.0  
-**Last Updated**: January 2024  
-**Maintainer**: Development Team
+**Last Updated**: August 2025  
+**Maintainer**: Tanay
+
