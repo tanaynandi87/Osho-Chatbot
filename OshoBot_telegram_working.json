@@ -22,8 +22,8 @@
       "id": "582d81f5-7c01-4398-9d50-087a50b14ef4",
       "credentials": {
         "httpHeaderAuth": {
-          "id": "RVC3IYeuzqG6ABjC",
-          "name": "Header Auth account"
+          "id": "${CREDENTIAL_ID}",
+          "name": "${CREDENTIAL_NAME}"
         }
       }
     },
@@ -68,11 +68,11 @@
       ],
       "id": "ed948013-5dd7-48ce-8ee8-dc438452c8a0",
       "name": "Telegram Trigger",
-      "webhookId": "9b495821-ee68-4880-8e9e-5a6061e43480",
+      "webhookId": "${WEBHOOK_ID}",
       "credentials": {
         "telegramApi": {
-          "id": "AWa2eqVflZWavuvC",
-          "name": "Osho_Chat"
+          "id": "${CREDENTIAL_ID}",
+          "name": "${CREDENTIAL_NAME}"
         }
       }
     },
@@ -102,7 +102,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "https://osho-works-1536-16df9o7.svc.aped-4627-b74a.pinecone.io/query",
+        "url": "${PINECONE_ENDPOINT}",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -191,11 +191,11 @@
       ],
       "id": "c11a0349-439f-43fd-9d24-8480a2422a18",
       "name": "Send a text message",
-      "webhookId": "53ade30b-51dc-4d23-b6cc-912c9a2dff00",
+      "webhookId": "${WEBHOOK_ID}",
       "credentials": {
         "telegramApi": {
-          "id": "AWa2eqVflZWavuvC",
-          "name": "Osho_Chat"
+          "id": "${CREDENTIAL_ID}",
+          "name": "${CREDENTIAL_NAME}"
         }
       }
     },
@@ -216,7 +216,7 @@
       "parameters": {
         "documentId": {
           "__rl": true,
-          "value": "1smLslmk48tUV6Hntc9kjLERWy5ikfW-31qqKKySw_3c",
+          "value": "${GOOGLE_SHEET_ID}",
           "mode": "list",
           "cachedResultName": "Osho_Chatbot",
           "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1smLslmk48tUV6Hntc9kjLERWy5ikfW-31qqKKySw_3c/edit?usp=drivesdk"
@@ -226,8 +226,7 @@
           "value": "gid=0",
           "mode": "list",
           "cachedResultName": "Users",
-          "cachedResultName": "Users",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1smLslmk48tUV6Hntc9kjLERWy5ikfW-31qqKKySw_3c/edit#gid=0"
+          "cachedResultUrl": "${GOOGLE_SHEET_URL}"
         },
         "filtersUI": {
           "values": [
@@ -250,8 +249,8 @@
       "alwaysOutputData": true,
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "OHYrQ1fXwDcvFQEI",
-          "name": "Google Sheets account"
+          "id": "${CREDENTIAL_ID}",
+          "name": "${CREDENTIAL_NAME}"
         }
       }
     },
@@ -298,7 +297,7 @@
         "operation": "append",
         "documentId": {
           "__rl": true,
-          "value": "1smLslmk48tUV6Hntc9kjLERWy5ikfW-31qqKKySw_3c",
+          "value": "${GOOGLE_SHEET_ID}",
           "mode": "list",
           "cachedResultName": "Osho_Chatbot",
           "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1smLslmk48tUV6Hntc9kjLERWy5ikfW-31qqKKySw_3c/edit?usp=drivesdk"
@@ -308,7 +307,7 @@
           "value": "gid=0",
           "mode": "list",
           "cachedResultName": "Users",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1smLslmk48tUV6Hntc9kjLERWy5ikfW-31qqKKySw_3c/edit#gid=0"
+          "cachedResultUrl": "${GOOGLE_SHEET_URL}"
         },
         "columns": {
           "mappingMode": "defineBelow",
@@ -372,8 +371,8 @@
       "name": "Create User",
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "OHYrQ1fXwDcvFQEI",
-          "name": "Google Sheets account"
+          "id": "${CREDENTIAL_ID}",
+          "name": "${CREDENTIAL_NAME}"
         }
       }
     },
@@ -441,11 +440,11 @@
       ],
       "id": "236f1342-101d-44da-9c8b-9ff1fea3e546",
       "name": "Send a text message1",
-      "webhookId": "648a570e-c6b3-442a-9fbc-f242b17b123e",
+      "webhookId": "${WEBHOOK_ID}",
       "credentials": {
         "telegramApi": {
-          "id": "AWa2eqVflZWavuvC",
-          "name": "Osho_Chat"
+          "id": "${CREDENTIAL_ID}",
+          "name": "${CREDENTIAL_NAME}"
         }
       }
     },
@@ -559,8 +558,8 @@
       "name": "HTTP Request",
       "credentials": {
         "httpBasicAuth": {
-          "id": "dZEBM3riZcXkLnYE",
-          "name": "Razorpay Live"
+          "id": "${CREDENTIAL_ID}",
+          "name": "${CREDENTIAL_NAME}"
         }
       }
     },
@@ -592,7 +591,7 @@
         "operation": "append",
         "documentId": {
           "__rl": true,
-          "value": "1smLslmk48tUV6Hntc9kjLERWy5ikfW-31qqKKySw_3c",
+          "value": "${GOOGLE_SHEET_ID}",
           "mode": "list",
           "cachedResultName": "Osho_Chatbot",
           "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1smLslmk48tUV6Hntc9kjLERWy5ikfW-31qqKKySw_3c/edit?usp=drivesdk"
@@ -602,7 +601,7 @@
           "value": 1762382163,
           "mode": "list",
           "cachedResultName": "PaymentRequest",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1smLslmk48tUV6Hntc9kjLERWy5ikfW-31qqKKySw_3c/edit#gid=1762382163"
+          "cachedResultUrl": "${GOOGLE_SHEET_URL}"
         },
         "columns": {
           "mappingMode": "defineBelow",
@@ -656,8 +655,8 @@
       "name": "Append row in sheet4",
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "OHYrQ1fXwDcvFQEI",
-          "name": "Google Sheets account"
+          "id": "${CREDENTIAL_ID}",
+          "name": "${CREDENTIAL_NAME}"
         }
       }
     },
@@ -666,7 +665,7 @@
         "operation": "appendOrUpdate",
         "documentId": {
           "__rl": true,
-          "value": "1smLslmk48tUV6Hntc9kjLERWy5ikfW-31qqKKySw_3c",
+          "value": "${GOOGLE_SHEET_ID}",
           "mode": "list",
           "cachedResultName": "Osho_Chatbot",
           "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1smLslmk48tUV6Hntc9kjLERWy5ikfW-31qqKKySw_3c/edit?usp=drivesdk"
@@ -676,7 +675,7 @@
           "value": "gid=0",
           "mode": "list",
           "cachedResultName": "Users",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1smLslmk48tUV6Hntc9kjLERWy5ikfW-31qqKKySw_3c/edit#gid=0"
+          "cachedResultUrl": "${GOOGLE_SHEET_URL}"
         },
         "columns": {
           "mappingMode": "defineBelow",
@@ -743,8 +742,8 @@
       "name": "Update User",
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "OHYrQ1fXwDcvFQEI",
-          "name": "Google Sheets account"
+          "id": "${CREDENTIAL_ID}",
+          "name": "${CREDENTIAL_NAME}"
         }
       }
     },
@@ -753,7 +752,7 @@
         "operation": "append",
         "documentId": {
           "__rl": true,
-          "value": "1smLslmk48tUV6Hntc9kjLERWy5ikfW-31qqKKySw_3c",
+          "value": "${GOOGLE_SHEET_ID}",
           "mode": "list",
           "cachedResultName": "Osho_Chatbot",
           "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1smLslmk48tUV6Hntc9kjLERWy5ikfW-31qqKKySw_3c/edit?usp=drivesdk"
@@ -763,7 +762,7 @@
           "value": 1532254067,
           "mode": "list",
           "cachedResultName": "PromptLog",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1smLslmk48tUV6Hntc9kjLERWy5ikfW-31qqKKySw_3c/edit#gid=1532254067"
+          "cachedResultUrl": "${GOOGLE_SHEET_URL}"
         },
         "columns": {
           "mappingMode": "defineBelow",
@@ -852,8 +851,8 @@
       "name": "Append row in sheet",
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "OHYrQ1fXwDcvFQEI",
-          "name": "Google Sheets account"
+          "id": "${CREDENTIAL_ID}",
+          "name": "${CREDENTIAL_NAME}"
         }
       }
     },
@@ -871,7 +870,7 @@
         0,
         645
       ],
-      "webhookId": "a3057e3f-d3e3-44fc-ba91-a3e2ee8f8e60"
+      "webhookId": "${WEBHOOK_ID}"
     },
     {
       "parameters": {
@@ -919,7 +918,7 @@
         "operation": "appendOrUpdate",
         "documentId": {
           "__rl": true,
-          "value": "1smLslmk48tUV6Hntc9kjLERWy5ikfW-31qqKKySw_3c",
+          "value": "${GOOGLE_SHEET_ID}",
           "mode": "list",
           "cachedResultName": "Osho_Chatbot",
           "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1smLslmk48tUV6Hntc9kjLERWy5ikfW-31qqKKySw_3c/edit?usp=drivesdk"
@@ -929,7 +928,7 @@
           "value": "gid=0",
           "mode": "list",
           "cachedResultName": "Users",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1smLslmk48tUV6Hntc9kjLERWy5ikfW-31qqKKySw_3c/edit#gid=0"
+          "cachedResultUrl": "${GOOGLE_SHEET_URL}"
         },
         "columns": {
           "mappingMode": "defineBelow",
@@ -1005,8 +1004,8 @@
       "name": "Append or update row in sheet2",
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "OHYrQ1fXwDcvFQEI",
-          "name": "Google Sheets account"
+          "id": "${CREDENTIAL_ID}",
+          "name": "${CREDENTIAL_NAME}"
         }
       }
     },
@@ -1026,11 +1025,11 @@
       ],
       "id": "a52d0cc2-6720-4c4f-8e7f-6c9066055668",
       "name": "Send a text message3",
-      "webhookId": "758ee555-7c8b-4f8d-a0d3-01dee24cfe13",
+      "webhookId": "${WEBHOOK_ID}",
       "credentials": {
         "telegramApi": {
-          "id": "AWa2eqVflZWavuvC",
-          "name": "Osho_Chat"
+          "id": "${CREDENTIAL_ID}",
+          "name": "${CREDENTIAL_NAME}"
         }
       }
     },
@@ -1084,8 +1083,8 @@
       "name": "Postgres Chat Memory",
       "credentials": {
         "postgres": {
-          "id": "S9pPszYXaJ1adeaF",
-          "name": "Postgres account 2"
+          "id": "${CREDENTIAL_ID}",
+          "name": "${CREDENTIAL_NAME}"
         }
       }
     },
@@ -1109,8 +1108,8 @@
       "name": "OpenAI Chat Model",
       "credentials": {
         "openAiApi": {
-          "id": "fBS2Fa5Tv799jyH0",
-          "name": "OpenAi account"
+          "id": "${CREDENTIAL_ID}",
+          "name": "${CREDENTIAL_NAME}"
         }
       }
     },
@@ -1130,11 +1129,11 @@
       ],
       "id": "39bb5775-0db3-47a9-bfbc-64e22ed81c17",
       "name": "Send a text message4",
-      "webhookId": "699bc488-0755-42c4-b026-4b31e231ad49",
+      "webhookId": "${WEBHOOK_ID}",
       "credentials": {
         "telegramApi": {
-          "id": "AWa2eqVflZWavuvC",
-          "name": "Osho_Chat"
+          "id": "${CREDENTIAL_ID}",
+          "name": "${CREDENTIAL_NAME}"
         }
       }
     }
