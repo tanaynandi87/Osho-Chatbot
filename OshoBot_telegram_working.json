@@ -112,7 +112,7 @@
             },
             {
               "name": "Api-Key",
-              "value": "pcsk_7Xo83d_L6WxJL9xe1qAWmRsEtzocGC28xhBCu9JQHTgiVFKBekSNrd8YcPq98toBrLCDLZ"
+              "value": "pinecone_api"
             }
           ]
         },
@@ -219,7 +219,7 @@
           "value": "${GOOGLE_SHEET_ID}",
           "mode": "list",
           "cachedResultName": "Osho_Chatbot",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1smLslmk48tUV6Hntc9kjLERWy5ikfW-31qqKKySw_3c/edit?usp=drivesdk"
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/documentID"
         },
         "sheetName": {
           "__rl": true,
@@ -300,7 +300,7 @@
           "value": "${GOOGLE_SHEET_ID}",
           "mode": "list",
           "cachedResultName": "Osho_Chatbot",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1smLslmk48tUV6Hntc9kjLERWy5ikfW-31qqKKySw_3c/edit?usp=drivesdk"
+          "cachedResultUrl": ""
         },
         "sheetName": {
           "__rl": true,
@@ -526,7 +526,7 @@
             },
             {
               "name": "customer.contact",
-              "value": "+917319478732"
+              "value": "+insert contact"
             },
             {
               "name": "notify.sms",
@@ -594,7 +594,7 @@
           "value": "${GOOGLE_SHEET_ID}",
           "mode": "list",
           "cachedResultName": "Osho_Chatbot",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1smLslmk48tUV6Hntc9kjLERWy5ikfW-31qqKKySw_3c/edit?usp=drivesdk"
+          "cachedResultUrl": ""
         },
         "sheetName": {
           "__rl": true,
@@ -668,7 +668,7 @@
           "value": "${GOOGLE_SHEET_ID}",
           "mode": "list",
           "cachedResultName": "Osho_Chatbot",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1smLslmk48tUV6Hntc9kjLERWy5ikfW-31qqKKySw_3c/edit?usp=drivesdk"
+          "cachedResultUrl": ""
         },
         "sheetName": {
           "__rl": true,
@@ -755,7 +755,7 @@
           "value": "${GOOGLE_SHEET_ID}",
           "mode": "list",
           "cachedResultName": "Osho_Chatbot",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1smLslmk48tUV6Hntc9kjLERWy5ikfW-31qqKKySw_3c/edit?usp=drivesdk"
+          "cachedResultUrl": "dk"
         },
         "sheetName": {
           "__rl": true,
@@ -921,7 +921,7 @@
           "value": "${GOOGLE_SHEET_ID}",
           "mode": "list",
           "cachedResultName": "Osho_Chatbot",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1smLslmk48tUV6Hntc9kjLERWy5ikfW-31qqKKySw_3c/edit?usp=drivesdk"
+          "cachedResultUrl": ""
         },
         "sheetName": {
           "__rl": true,
